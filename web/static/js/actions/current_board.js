@@ -18,7 +18,21 @@ const Actions = {
         dispatch({
           type: Constants.CURRENT_BOARD_MEMBER_ADDED,
           user: msg.user
-        })
+        });
+      });
+
+      channel.on('user:joined', (msg) => {
+        dispatch({
+          type: Constants.CURRENT_BOARD_CONNECTED_USERS,
+          users: msg.users
+        });
+      });
+
+      channel.on('user:left', (msg) => {
+        dispatch({
+          type: Constants.CURRENT_BOARD_CONNECTED_USERS,
+          users: msg.users
+        });
       });
 
       dispatch({
@@ -46,6 +60,12 @@ const Actions = {
             error: data.error
           });
         });
+    };
+  },
+
+  leaveChannel: (channel) => {
+    return dispatch => {
+      channel.leave();
     };
   }
 };

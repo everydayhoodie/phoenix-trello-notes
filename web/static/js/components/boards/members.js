@@ -52,7 +52,7 @@ export default class BoardMembers extends React.Component {
   }
 
   _renderError() {
-    const { error } this.props;
+    const { error } = this.props;
 
     if (!error) return false;
 

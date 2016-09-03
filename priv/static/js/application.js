@@ -31586,7 +31586,7 @@
 
 	var _utils = __webpack_require__(278);
 
-	var _current_board = __webpack_require__(!(function webpackMissingModule() { var e = new Error("Cannot find module \"../current_board\""); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
+	var _current_board = __webpack_require__(304);
 
 	var _current_board2 = _interopRequireDefault(_current_board);
 
@@ -32098,7 +32098,7 @@
 
 	var _utils = __webpack_require__(278);
 
-	var _members = __webpack_require__(!(function webpackMissingModule() { var e = new Error("Cannot find module \"../../components/boards/members\""); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
+	var _members = __webpack_require__(305);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -32130,7 +32130,12 @@
 	  }, {
 	    key: 'componentWillUnmount',
 	    value: function componentWillUnmount() {
-	      this.props.dispatch(_current_board2.default.leaveChannel(this.props.currentBoard.channel));
+	      var _props = this.props;
+	      var dispatch = _props.dispatch;
+	      var currentBoard = _props.currentBoard;
+
+
+	      dispatch(_current_board2.default.leaveChannel(currentBoard.channel));
 	    }
 	  }, {
 	    key: '_renderMembers',
@@ -34373,7 +34378,7 @@
 	  BOARDS_NEW_BOARD_CREATED: 'BOARDS_NEW_BOARD_CREATED',
 
 	  CURRENT_BOARD_FETCHING: 'CURRENT_BOARD_FETCHING',
-
+	  CURRENT_BOARD_CONNECTED_USERS: 'CURRENT_BOARD_CONNECTED_USERS',
 	  CURRENT_BOARD_CONNECTED_TO_CHANNEL: 'CURRENT_BOARD_CONNECTED_TO_CHANNEL',
 
 	  CURRENT_BOARD_SHOW_MEMBERS_FORM: 'CURRENT_BOARD_SHOW_MEMBERS_FORM',
@@ -34420,6 +34425,20 @@
 	        });
 	      });
 
+	      channel.on('user:joined', function (msg) {
+	        dispatch({
+	          type: _constants2.default.CURRENT_BOARD_CONNECTED_USERS,
+	          users: msg.users
+	        });
+	      });
+
+	      channel.on('user:left', function (msg) {
+	        dispatch({
+	          type: _constants2.default.CURRENT_BOARD_CONNECTED_USERS,
+	          users: msg.users
+	        });
+	      });
+
 	      dispatch({
 	        type: _constants2.default.CURRENT_BOARD_CONNECTED_TO_CHANNEL,
 	        channel: channel
@@ -34445,10 +34464,199 @@
 	        });
 	      });
 	    };
+	  },
+
+	  leaveChannel: function leaveChannel(channel) {
+	    return function (dispatch) {
+	      channel.leave();
+	    };
 	  }
 	};
 
 	exports.default = Actions;
+
+/***/ },
+/* 305 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.default = undefined;
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(6);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _reactGravatar = __webpack_require__(295);
+
+	var _reactGravatar2 = _interopRequireDefault(_reactGravatar);
+
+	var _classnames = __webpack_require__(277);
+
+	var _classnames2 = _interopRequireDefault(_classnames);
+
+	var _reactPageClick = __webpack_require__(291);
+
+	var _reactPageClick2 = _interopRequireDefault(_reactPageClick);
+
+	var _current_board = __webpack_require__(304);
+
+	var _current_board2 = _interopRequireDefault(_current_board);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var BoardMembers = function (_React$Component) {
+	  _inherits(BoardMembers, _React$Component);
+
+	  function BoardMembers() {
+	    _classCallCheck(this, BoardMembers);
+
+	    return _possibleConstructorReturn(this, (BoardMembers.__proto__ || Object.getPrototypeOf(BoardMembers)).apply(this, arguments));
+	  }
+
+	  _createClass(BoardMembers, [{
+	    key: '_renderUsers',
+	    value: function _renderUsers() {
+	      var _this2 = this;
+
+	      return this.props.members.map(function (member) {
+	        var index = _this2.props.connectedUsers.findIndex(function (cu) {
+	          return cu === member.id;
+	        });
+
+	        var classes = (0, _classnames2.default)({ connected: index != -1 });
+
+	        return _react2.default.createElement(
+	          'li',
+	          { className: classes, key: member.id },
+	          _react2.default.createElement(_reactGravatar2.default, { className: 'react-gravatar', email: member.email, https: true })
+	        );
+	      });
+	    }
+	  }, {
+	    key: '_renderAddNewUser',
+	    value: function _renderAddNewUser() {
+	      if (!this.props.currentUserIsOwner) return false;
+
+	      return _react2.default.createElement(
+	        'li',
+	        null,
+	        _react2.default.createElement(
+	          'a',
+	          { onClick: this._handleAddNewClick.bind(this), className: 'add-new', href: '#' },
+	          _react2.default.createElement('i', { className: 'fa fa-plus' })
+	        ),
+	        this._renderForm.call(this)
+	      );
+	    }
+	  }, {
+	    key: '_renderForm',
+	    value: function _renderForm() {
+	      if (!this.props.show) return false;
+
+	      return _react2.default.createElement(
+	        _reactPageClick2.default,
+	        { onClick: this._handleCancelClick.bind(this) },
+	        _react2.default.createElement(
+	          'ul',
+	          { className: 'drop-down active' },
+	          _react2.default.createElement(
+	            'li',
+	            null,
+	            _react2.default.createElement(
+	              'form',
+	              { onSubmit: this._handleSubmit.bind(this) },
+	              _react2.default.createElement(
+	                'h4',
+	                null,
+	                'Add new members'
+	              ),
+	              this._renderError.call(this),
+	              _react2.default.createElement('input', { ref: 'email', type: 'email', required: true, placeholder: 'Member email' }),
+	              _react2.default.createElement(
+	                'button',
+	                { type: 'submit' },
+	                'Add member'
+	              ),
+	              ' or ',
+	              _react2.default.createElement(
+	                'a',
+	                { onClick: this._handleCancelClick.bind(this), href: '#' },
+	                'cancel'
+	              )
+	            )
+	          )
+	        )
+	      );
+	    }
+	  }, {
+	    key: '_renderError',
+	    value: function _renderError() {
+	      var error = this.props.error;
+
+
+	      if (!error) return false;
+
+	      return _react2.default.createElement(
+	        'div',
+	        { className: 'error' },
+	        error
+	      );
+	    }
+	  }, {
+	    key: '_handleAddNewClick',
+	    value: function _handleAddNewClick(e) {
+	      e.preventDefault();
+
+	      this.props.dispatch(_current_board2.default.showMembersForm(true));
+	    }
+	  }, {
+	    key: '_handleCancelClick',
+	    value: function _handleCancelClick(e) {
+	      e.preventDefault();
+
+	      this.props.dispatch(_current_board2.default.showMembersForm(false));
+	    }
+	  }, {
+	    key: '_handleSubmit',
+	    value: function _handleSubmit(e) {
+	      e.preventDefault();
+
+	      var email = this.refs.email;
+	      var _props = this.props;
+	      var dispatch = _props.dispatch;
+	      var channel = _props.channel;
+
+
+	      dispatch(_current_board2.default.addNewMember(channel, email.value));
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      return _react2.default.createElement(
+	        'ul',
+	        { className: 'board-users' },
+	        this._renderUsers.call(this),
+	        this._renderAddNewUser.call(this)
+	      );
+	    }
+	  }]);
+
+	  return BoardMembers;
+	}(_react2.default.Component);
+
+	exports.default = BoardMembers;
 
 /***/ }
 /******/ ]);
