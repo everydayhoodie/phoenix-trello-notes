@@ -10,6 +10,11 @@ const initialState = {
 export defeault
 function reducer(state = initialState, action = {}) {
   switch (action.type) {
+    case Constants.BOARDS_ADDED:
+      const { inviteBoards } = state;
+
+      return { ...state, inviteBoards, [action.board].concat(inviteBoards) };
+
     case Constants.BOARDS_FETCHING:
       return { ...state, fetching: true };
 

@@ -101,4 +101,4 @@ const mapStateToProps = (state) => (
   state.boards
 );
 
-export defeault connect(mapStateToProps)(HomeIndexView);
+export default connect(mapStateToProps)(HomeIndexView);

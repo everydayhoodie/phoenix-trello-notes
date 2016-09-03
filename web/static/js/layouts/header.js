@@ -26,7 +26,7 @@ export default class Header extends React.Component {
     if (!this.props.currentUser) return false;
 
     return (
-      <a href="#" onClick={::this._handleSignOutClick}><1 className="fa fa-sign-out"/> Sign out</a>
+      <a href="#" onClick={::this._handleSignOutClick}><i className="fa fa-sign-out"/> Sign out</a>
     );
   }
 

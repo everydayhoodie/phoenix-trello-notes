@@ -3,7 +3,7 @@ import PageClick from 'react-page-click';
 import Actions from '../../actions/boards';
 import {renderErrorsFor} from '../../utils';
 
-export defeault class BoardForm extends React.Component {
+export default class BoardForm extends React.Component {
   componentDidMount() {
     this.refs.name.focus();
   }
@@ -15,7 +15,7 @@ export defeault class BoardForm extends React.Component {
     const { name } = this.refs;
 
     const data = {
-      name: name.value;
+      name: name.value
     }
 
     dispatch(Actions.create(data));

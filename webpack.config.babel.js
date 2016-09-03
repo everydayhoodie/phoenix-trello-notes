@@ -33,7 +33,7 @@ var config = module.exports = {
     module: {
         noParse: /vendor\/phoenix/,
         loaders: [{
-            test: /\.jsx$/,
+            test: /\.jsx?$/,
             exclude: /node_modules/,
             loader: 'babel',
             query: {

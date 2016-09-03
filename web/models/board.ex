@@ -7,6 +7,9 @@ defmodule PhoenixTrello.Board do
     field :name, :string
     belongs_to :user, PhoenixTrello.User
 
+    has_many :user_boards, PhoenixTrello.UserBoard
+    has_many :members, through: [:user_boards, :user]
+
     timestamps()
   end
 

@@ -49,4 +49,4 @@ const Actions = {
   }
 }
 
-export defeault Actions;
+export default Actions;

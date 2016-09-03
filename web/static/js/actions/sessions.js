@@ -24,6 +24,13 @@ export function setCurrentUser(dispatch, user) {
       channel: channel
     });
   });
+
+  channel.on('boards:add', (msg) => {
+    dispatch({
+      type: Constants.BOARDS_ADDED,
+      board: msg.board
+    });
+  });
 }
 
 const Actions = {
@@ -74,7 +81,7 @@ const Actions = {
           localStorage.removeItem('phoenixAuthToken');
 
           dispatch({
-            type: Constants.USER_SIGNED_OUT;
+            type: Constants.USER_SIGNED_OUT
           });
 
           dispatch(routeActions.push('/sign_in'));
