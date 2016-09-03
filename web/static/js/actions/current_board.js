@@ -35,6 +35,20 @@ const Actions = {
         });
       });
 
+      channel.on('list:created', (msg) => {
+        dispatch({
+          type: Constants.CURRENT_BOARD_LIST_CREATED,
+          list: msg.list
+        });
+      });
+
+      channel.on('card:created', (msg) => {
+        dispatch({
+          type: Constants.CURRENT_BOARD_CARD_CREATED,
+          catd: msg.card
+        });
+      });
+
       dispatch({
         type: Constants.CURRENT_BOARD_CONNECTED_TO_CHANNEL,
         channel: channel
