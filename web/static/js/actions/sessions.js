@@ -1,37 +1,36 @@
-import { routeActions } from 'react-router-redux';
+import { push } from 'react-router-redux';
 import Constants from '../constants';
 import { Socket } from 'phoenix';
 import { httpGet, httpPost, httpDelete } from '../utils';
 
 export function setCurrentUser(dispatch, user) {
-  dispatch({
-    type: Constants.CURRENT_USER,
-    currentUser: user
-  });
-
   const socket = new Socket('/socket', {
-    params: { token: localStorage.getItem('phoenixAuthToken')}
+    params: { token: localStorage.getItem('phoenixAuthToken') },
+    logger: (kind, msg, data) => { console.log(`${kind}: ${msg}`, data); }
   });
 
   socket.connect();
 
   const channel = socket.channel(`users:${user.id}`);
 
-  channel.join().receive('ok', () => {
-    dispatch({
-      type: Constants.SOCKET_CONNECTED,
-      socket: socket,
-      channel: channel
+  if (channel.state != 'joined') {
+    channel.join().receive('ok', () => {
+      dispatch({
+        type: Constants.CURRENT_USER,
+        currentUser: user,
+        socket: socket,
+        channel: channel
+      });
     });
-  });
+  }
 
   channel.on('boards:add', (msg) => {
     dispatch({
-      type: Constants.BOARDS_ADDED,
-      board: msg.board
-    });
+        type: Constants.BOARDS_ADDED,
+        board: msg.board,
+      });
   });
-}
+};
 
 const Actions = {
   signIn: (email, password) => {
@@ -47,9 +46,9 @@ const Actions = {
         .then((data) => {
           localStorage.setItem('phoenixAuthToken', data.jwt);
           setCurrentUser(dispatch, data.user);
-          dispatch(routeActions.push('/'));
+          dispatch(push('/'));
         })
-        .cathch((error) => {
+        .catch((error) => {
           error.response.json()
             .then((errorJSON) => {
               dispatch({
@@ -63,13 +62,15 @@ const Actions = {
 
   currentUser: () => {
     return dispatch => {
+      const authToken = localStorage.getItem('phoenixAuthToken');
+
       httpGet('/api/v1/current_user')
         .then((data) => {
           setCurrentUser(dispatch, data);
         })
         .catch((error) => {
           console.log(error);
-          dispatch(routeActions.push('/sign_in'));
+          dispatch(push('/sign_in'));
         });
     }
   },
@@ -84,7 +85,9 @@ const Actions = {
             type: Constants.USER_SIGNED_OUT
           });
 
-          dispatch(routeActions.push('/sign_in'));
+          dispatch(push('/sign_in'));
+
+          dispatch({ type: Constants.BOARDS_FULL_RESET });
         })
         .catch((error) => {
           console.log(error);

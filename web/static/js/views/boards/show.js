@@ -1,9 +1,16 @@
-import React, { PropTypes} from 'react';
+import React, {PropTypes} from 'react';
 import { connect } from 'react-redux';
+import {DragDropContext} from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
+
 import Actions from '../../actions/current_board';
 import Constants from '../../constants';
 import { setDocumentTitle } from '../../utils';
-import { BordMembers } from '../../components/boards/members';
+import ListForm from '../../components/lists/form';
+import ListCard from '../../components/lists/card';
+import BoardMembers from '../../components/boards/members';
+
+@DragDropContext(HTML5Backend)
 
 class BoardsShowView extends React.Component {
   componentDidMount() {
@@ -14,10 +21,19 @@ class BoardsShowView extends React.Component {
     this.props.dispatch(Actions.connectToChannel(socket, this.props.params.id));
   }
 
-  componentWillUnmount() {
-    const { dispatch,  currentBoard} = this.props;
+  componentWillUpdate(nextProps, nextState) {
+    const { socket } = this.props;
+    const { currentBoard } = nextProps;
 
-    dispatch(Actions.leaveChannel(currentBoard.channel));
+    if (currentBoard.name !== undefined) setDocumentTitle(currentBoard.name);
+
+    if (socket) return false;
+
+    this.props.dispatch(Actions.connectToChannel(nextProps.socket, this.props.params.id));
+  }
+
+  componentWillUnmount() {
+    this.props.dispatch(Actions.leaveChannel(this.props.currentBoard.channel));
   }
 
   _renderMembers() {
@@ -38,8 +54,8 @@ class BoardsShowView extends React.Component {
     );
   }
 
-  _renderList() {
-    const { lists, channel, id, addingNewCardInListId} = this.props.currentBoard;
+  _renderLists() {
+    const { lists, channel, editingListId, id, addingNewCardInListId } = this.props.currentBoard;
 
     return lists.map((list) => {
       return (
@@ -48,6 +64,10 @@ class BoardsShowView extends React.Component {
           boardId={id}
           dispatch={this.props.dispatch}
           channel={channel}
+          isEditing={editingListId === list.id}
+          onDropCard={::this._handleDropCard}
+          onDropCardWhenEmpty={::this._handleDropCardWhenEmpty}
+          onDrop={::this._handleDropList}
           isAddingNewCard={addingNewCardInListId === list.id}
           {...list} />
       );
@@ -88,6 +108,79 @@ class BoardsShowView extends React.Component {
     this.props.dispatch(Actions.showForm(false));
   }
 
+  _handleDropCard({ source, target }) {
+    const { lists, channel } = this.props.currentBoard;
+    const { dispatch } = this.props;
+
+    const sourceListIndex = lists.findIndex((list) => { return list.id === source.list_id; });
+    const sourceList = lists[sourceListIndex];
+    const sourceCardIndex = sourceList.cards.findIndex((card) => { return card.id === source.id; });
+    const sourceCard = sourceList.cards[sourceCardIndex];
+
+    const targetListIndex = lists.findIndex((list) => { return list.id === target.list_id; });
+    let targetList = lists[targetListIndex];
+    const targetCardIndex = targetList.cards.findIndex((card) => { return card.id === target.id; });
+    const targetCard = targetList.cards[targetCardIndex];
+    const previousTargetCard = sourceList.cards[sourceCardIndex + 1];
+
+    if (previousTargetCard === targetCard) { return false; }
+
+    sourceList.cards.splice(sourceCardIndex, 1);
+
+    if (sourceList === targetList) {
+      const insertIndex = sourceCardIndex < targetCardIndex ? targetCardIndex - 1 : targetCardIndex;
+      // move at once to avoid complications
+      targetList = sourceList;
+      sourceList.cards.splice(insertIndex, 0, source);
+    } else {
+      // and move it to target
+      targetList.cards.splice(targetCardIndex, 0, source);
+    }
+
+    const newIndex = targetList.cards.findIndex((card) => { return card.id === source.id; });
+
+    const position = newIndex == 0 ? targetList.cards[newIndex + 1].position / 2 : newIndex == (targetList.cards.length - 1) ? targetList.cards[newIndex - 1].position + 1024 : (targetList.cards[newIndex - 1].position + targetList.cards[newIndex + 1].position) / 2;
+
+    const data = {
+      id: sourceCard.id,
+      list_id: targetList.id,
+      position: position,
+    };
+
+    dispatch(Actions.updateCard(channel, data));
+  }
+
+  _handleDropList({ source, target }) {
+    const { lists, channel } = this.props.currentBoard;
+    const { dispatch } = this.props;
+
+    const sourceListIndex = lists.findIndex((list) => { return list.id === source.id; });
+    const sourceList = lists[sourceListIndex];
+    lists.splice(sourceListIndex, 1);
+
+    const targetListIndex = lists.findIndex((list) => { return list.id === target.id; });
+    const targetList = lists[targetListIndex];
+    lists.splice(targetListIndex, 0, sourceList);
+
+    const newIndex = lists.findIndex((list) => { return list.id === source.id; });
+
+    const position = newIndex == 0 ? lists[newIndex + 1].position / 2 : newIndex == (lists.length - 1) ? lists[newIndex - 1].position + 1024 : (lists[newIndex - 1].position + lists[newIndex + 1].position) / 2;
+
+    const data = {
+      id: source.id,
+      position: position,
+    };
+
+    dispatch(Actions.updateList(channel, data));
+  }
+
+  _handleDropCardWhenEmpty(card) {
+    const { channel } = this.props.currentBoard;
+    const { dispatch } = this.props;
+
+    dispatch(Actions.updateCard(channel, card));
+  }
+
   render() {
     const { fetching, name } = this.props.currentBoard;
 
@@ -111,6 +204,7 @@ class BoardsShowView extends React.Component {
             </div>
           </div>
         </div>
+        {this.props.children}
       </div>
     );
   }

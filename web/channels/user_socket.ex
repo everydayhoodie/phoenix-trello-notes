@@ -5,12 +5,12 @@ defmodule PhoenixTrello.UserSocket do
 
   ## Channels
   # channel "room:*", PhoenixTrello.RoomChannel
-  channel "users:*", PhoenixTrello.UserChannel
   channel "boards:*", PhoenixTrello.BoardChannel
+  channel "users:*", PhoenixTrello.UserChannel
 
   ## Transports
   transport :websocket, Phoenix.Transports.WebSocket
-  # transport :longpoll, Phoenix.Transports.LongPoll
+  transport :longpoll, Phoenix.Transports.LongPoll
 
   # Socket params are passed from the client and can
   # be used to verify and authenticate a user. After

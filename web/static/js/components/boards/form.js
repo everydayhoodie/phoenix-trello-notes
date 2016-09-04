@@ -1,6 +1,6 @@
 import React, { PropTypes } from 'react';
-import PageClick from 'react-page-click';
 import Actions from '../../actions/boards';
+import PageClick from 'react-page-click';
 import {renderErrorsFor} from '../../utils';
 
 export default class BoardForm extends React.Component {
@@ -8,7 +8,7 @@ export default class BoardForm extends React.Component {
     this.refs.name.focus();
   }
 
-  _handleSubmit() {
+  _handleSubmit(e) {
     e.preventDefault();
 
     const { dispatch } = this.props;
@@ -16,12 +16,12 @@ export default class BoardForm extends React.Component {
 
     const data = {
       name: name.value
-    }
+    };
 
     dispatch(Actions.create(data));
   }
 
-  _handleCancelClick() {
+  _handleCancelClick(e) {
     e.preventDefault();
 
     this.props.onCancelClick();

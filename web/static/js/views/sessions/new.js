@@ -5,7 +5,7 @@ import { Link } from 'react-router';
 import { setDocumentTitle } from '../../utils';
 import Actions from '../../actions/sessions';
 
-class SessionNew extends React.Component {
+class SessionsNew extends React.Component {
   componentDidMount() {
     setDocumentTitle('Sign in');
   }
@@ -33,18 +33,30 @@ class SessionNew extends React.Component {
 
   render() {
     return (
-      <div className="view-container sessions new">
+      <div className='view-container sessions new'>
         <main>
           <header>
             <div className="logo" />
           </header>
-          <form onSubmit={::this._handleSubmit}>
+          <form id="sign_in_form" onSubmit={::this._handleSubmit}>
             {::this._renderError()}
             <div className="field">
-              <input ref="email" type="Email" placeholder="Email" required="true" defaultValue="john@phoenix-trello.com"/>
+              <input
+                ref="email"
+                type="Email"
+                id="user_email"
+                placeholder="Email"
+                required="true"
+                defaultValue="john@phoenix-trello.com"/>
             </div>
             <div className="field">
-              <input ref="password" type="password" placeholder="Password" required="true" defaultValue="12345678"/>
+              <input
+                ref="password"
+                type="password"
+                id="user_password"
+                placeholder="Password"
+                required="true"
+                defaultValue="12345678"/>
             </div>
             <button type="submit">Sign in</button>
           </form>
@@ -59,4 +71,4 @@ const mapStateToProps = (state) => (
   state.session
 );
 
-export default connect(mapStateToProps)(SessionNew);
+export default connect(mapStateToProps)(SessionsNew);
